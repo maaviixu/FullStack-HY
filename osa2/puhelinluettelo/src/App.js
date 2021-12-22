@@ -3,14 +3,18 @@ import Person from './components/Person'
 import Filter from './components/FilterForm'
 import filterPersons from './components/Filter'
 import personService from './services/persons'
-import axios from 'axios'
+import Effect from './components/EffectNotification'
+import ErrorNotification from './components/ErrorNotification'
+
 
 
 const App = () => {
   const [persons, setPersons] = useState([])
-  const [newName, setNewName] = useState('Uusi nimi...')
+  const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [effectMessage, setEffectMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
   
   useEffect(() => {
     personService
@@ -37,10 +41,10 @@ const App = () => {
         replace the old number with a new one`)
       if (result) {
         let id = nimi.id
-        console.log('ukon id: ', id)
-        console.log('uusi num: ', newNumber)
+        //console.log('ukon id: ', id)
+        //console.log('uusi num: ', newNumber)
         const changedNum = {...nimi, number: newNumber}
-        console.log('uusi olio :', changedNum)
+        //console.log('uusi olio :', changedNum)
         
         personService
           .update(id, changedNum)
@@ -48,7 +52,25 @@ const App = () => {
             setPersons(persons.map(person => person.id !== id ? person : response))
             setNewName('')
             setNewNumber('')
+            setEffectMessage(
+              `${changedNum.name}'s number has been changed succesfully`
+            )
+            setTimeout(() => {
+              setEffectMessage(null)
+            }, 3000)
           })
+            
+            .catch(error => {
+              setErrorMessage(
+                `${changedNum.name} was already removed from server`
+              )
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 3000)
+              setPersons(persons.filter(n => n.id !== id))
+            })
+            
+          
           
       }
     } else {
@@ -58,6 +80,12 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setEffectMessage(
+            `${returnedPerson.name} added succesfully`
+          )
+          setTimeout(() => {
+            setEffectMessage(null)
+          }, 3000)
         })
     }
   }
@@ -82,7 +110,6 @@ const App = () => {
 
   const toggleDeleteOf = (id) => {
     console.log(`${id} poistetaan`)
-    const url = `http://localhost:3001/persons/${id}`
     const person = persons.find(n => n.id === id)
     console.log(person.name)
     const result = window.confirm(`poistetaanko ${person.name}`)
@@ -91,10 +118,20 @@ const App = () => {
       .poisto(id)
       .then(
       setPersons(persons.filter(n => n.id !== id)))
+      setEffectMessage(
+        `${person.name} was deleted succesfully`
+      )
+      setTimeout(() => {
+        setEffectMessage(null)
+      }, 3000)
     }  
   }
 
   /*
+
+  onnistuneista operaatioista 
+  (henkilön lisäys ja poisto sekä numeron muutos
+
   const toggleImportanceOf = id => {
     const url = `http://localhost:3001/notes/${id}`
     const note = notes.find(n => n.id === id)
@@ -111,11 +148,13 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Effect message={effectMessage} />
+      <ErrorNotification message={errorMessage} />
       <Filter text={newFilter} action={handleFilterChange} />
       <h2>add a new</h2>
       <form onSubmit={addPerson}>
         <div>
-          name: 
+          name:
           <input 
             value={newName}
             onChange={handleNameChange} 

@@ -1,24 +1,9 @@
 {
   "persons": [
     {
-      "name": "kalle",
-      "number": "1",
-      "id": 2
-    },
-    {
-      "name": "olli",
-      "number": "5",
-      "id": 3
-    },
-    {
-      "name": "keijo",
-      "number": "123",
-      "id": 4
-    },
-    {
-      "name": "olavi",
-      "number": "12344",
-      "id": 6
+      "name": "tepi",
+      "number": "2",
+      "id": 12
     }
   ]
 }
