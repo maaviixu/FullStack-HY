@@ -15,23 +15,22 @@ const App = () => {
   const [newFilter, setNewFilter] = useState('')
   const [effectMessage, setEffectMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  
+
   useEffect(() => {
     personService
       .getAll()
       .then(initialPersons => {
         setPersons(initialPersons)
       })
-    }, [])
-  //console.log('render', persons.length, 'persons')
+  }, [])
 
   const addPerson = event => {
     event.preventDefault()
     const nameObject = {
-      name: newName, 
+      name: newName,
       number: newNumber
     }
-    
+
     let nimi = persons.find(person => person.name === newName)
 
 
@@ -43,9 +42,9 @@ const App = () => {
         let id = nimi.id
         //console.log('ukon id: ', id)
         //console.log('uusi num: ', newNumber)
-        const changedNum = {...nimi, number: newNumber}
+        const changedNum = { ...nimi, number: newNumber }
         //console.log('uusi olio :', changedNum)
-        
+
         personService
           .update(id, changedNum)
           .then(response => {
@@ -59,24 +58,24 @@ const App = () => {
               setEffectMessage(null)
             }, 3000)
           })
-            
-            .catch(error => {
-              setErrorMessage(
-                `${changedNum.name} was already removed from server`
-              )
-              setTimeout(() => {
-                setErrorMessage(null)
-              }, 3000)
-              setPersons(persons.filter(n => n.id !== id))
-            })
-            
-          
-          
+
+          .catch(error => {
+            setErrorMessage(
+              `${changedNum.name} was already removed from server`
+            )
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 3000)
+            setPersons(persons.filter(n => n.id !== id))
+          })
+
+
+
       }
     } else {
       personService
         .create(nameObject)
-          .then(returnedPerson => {
+        .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
@@ -87,9 +86,15 @@ const App = () => {
             setEffectMessage(null)
           }, 3000)
         })
+        .catch(error => {
+          setErrorMessage(error.response.data.error.toString())
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 3000)
+        })
     }
   }
-  
+
 
   const handleNameChange = (event) => {
     console.log(event.target.value)
@@ -115,16 +120,16 @@ const App = () => {
     const result = window.confirm(`poistetaanko ${person.name}`)
     if (result) {
       personService
-      .poisto(id)
-      .then(
-      setPersons(persons.filter(n => n.id !== id)))
+        .poisto(id)
+        .then(
+          setPersons(persons.filter(n => n.id !== id)))
       setEffectMessage(
         `${person.name} was deleted succesfully`
       )
       setTimeout(() => {
         setEffectMessage(null)
       }, 3000)
-    }  
+    }
   }
 
   /*
@@ -155,14 +160,14 @@ const App = () => {
       <form onSubmit={addPerson}>
         <div>
           name:
-          <input 
+          <input
             value={newName}
-            onChange={handleNameChange} 
+            onChange={handleNameChange}
           />
         </div>
         <div>
           number:
-          <input 
+          <input
             value={newNumber}
             onChange={handleNumberChange}
           />
@@ -173,11 +178,11 @@ const App = () => {
       </form>
       <h2>Numbers</h2>
       {personsToShow.map(person =>
-        <Person 
-        key={person.id} 
-        person={person} 
-        toggleDelete={() => toggleDeleteOf(person.id)}/>
-        )}
+        <Person
+          key={person.id}
+          person={person}
+          toggleDelete={() => toggleDeleteOf(person.id)} />
+      )}
     </div>
   )
 
