@@ -1,33 +1,48 @@
 import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { voteAnecdote } from "../reducers/anecdoteReducer"
+import { setNotification, removeNotification } from "../reducers/notificationReducer"
 
-const AnecdoteList = () => {
-    const anecdotes = useSelector(state => state.sort((first, second) => 
-        (first.votes > second.votes) ? -1 : 1))
-    
-    const dispatch = useDispatch()
+const AnecdoteList = props => {
+  const dispatch = useDispatch()
   
-    const vote = (id) => {
-      dispatch(voteAnecdote(id))
-    }
-    
-      return (
-        <div>
-        {anecdotes.map(anecdote =>
-              <div key={anecdote.id}>
-                <div>
-                  {anecdote.content}
-                </div>
-                <div>
-                  has {anecdote.votes}
-                  <button onClick={() => vote(anecdote.id)}>vote</button>
-                </div>
-              </div>
-        )}
+  const anecdotes = useSelector(state => {
+    const filteredAnecdotes = state.anecdotes.filter(anecdote => 
+      anecdote.content.toLowerCase().indexOf(state.filter.toLowerCase()) !== -1)
+    const sortedAnecdotes = filteredAnecdotes.sort((a, b) => 
+      b.votes - a.votes)
+    return sortedAnecdotes
+  })
+  /*
+  const anecdotes = useSelector(state => state.anecdotes)   
+
+  const filteredAnecdotes = anecdotes.filter(anecdote => 
+    anecdote.content.toLowerCase().indexOf(anecdotes.filter.toLowerCase()) !== -1)
+
+  const sortedAnecdotes = filteredAnecdotes.sort((a, b) => b.votes - a.votes)
+    */
+  const vote = anecdote => {
+    dispatch(voteAnecdote(anecdote.id))
+    dispatch(setNotification(`You voted '${anecdote.content}'`))
+    setTimeout(() => {dispatch(removeNotification())}, 5000)
+  }
+
+  return (
+    <div>
+      {anecdotes.map(anecdote =>
+        <div key={anecdote.id}>
+          <div>
+            {anecdote.content}
+          </div>
+          <div>
+            has {anecdote.votes}
+            <button onClick={() => vote(anecdote)}>vote</button>
+          </div>
         </div>
-      )
-    
+      )}
+    </div>
+  )
+
 }
 
 export default AnecdoteList
